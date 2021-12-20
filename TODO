@@ -1,0 +1,16 @@
+1. Reproduction messes up - probably bad lower bound
+Exception in thread "Thread-5" java.lang.IndexOutOfBoundsException: Index 4 out of bounds for length 4
+                                                     	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+                                                     	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+                                                     	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:266)
+                                                     	at java.base/java.util.Objects.checkIndex(Objects.java:359)
+                                                     	at java.base/java.util.ArrayList.get(ArrayList.java:427)
+                                                     	at agh.project.utils.UpperBound.binarySearch(LowerBound.java:10)
+                                                     	at agh.project.game.map.AnimalLocationMap.getNFittest(AnimalLocationMap.java:32)
+                                                     	at agh.project.game.reproduction.StandardReproductionRules.reproduce(StandardReproductionRules.java:27)
+                                                     	at agh.project.game.map.WorldMap.reproducePhase(WorldMap.java:100)
+                                                     	at agh.project.game.Simulation$4.run(Simulation.java:46)
+                                                     	at agh.project.game.Simulation.run(Simulation.java:71)
+                                                     	at agh.project.Main$1.run(Main.java:55)
+                                                     	at java.base/java.lang.Thread.run(Thread.java:883)
+2. Display more than one animal in a tile (if possible)
