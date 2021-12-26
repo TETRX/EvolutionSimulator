@@ -1,6 +1,7 @@
 package agh.project;
 
 import agh.project.game.Simulation;
+import agh.project.game.information.IMapObserver;
 import agh.project.game.map.IWorldMap;
 
 import java.util.Scanner;
@@ -9,6 +10,19 @@ public class SimulationTest {
     public static void main(String[] args) {
         System.out.println("hi");
         IWorldMap mockWorldMap = new IWorldMap() {
+            @Override
+            public void subscribe(IMapObserver observer) {
+            }
+
+            @Override
+            public void unsubscribe(IMapObserver observer) {
+            }
+
+            @Override
+            public void notifyObservers() {
+
+            }
+
             @Override
             public void reproducePhase() {
                 System.out.println("reproducing");

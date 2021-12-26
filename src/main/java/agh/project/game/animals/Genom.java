@@ -3,6 +3,7 @@ package agh.project.game.animals;
 import agh.project.utils.Sampler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -10,6 +11,19 @@ public class Genom {
     private final Gene[] genes;
     private final Random random;
     public static final int GENE_NUMBER=32;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Genom genom = (Genom) o;
+        return Arrays.equals(genes, genom.genes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(genes);
+    }
 
     public Genom(Random random) {
         this.random = random;
@@ -56,5 +70,10 @@ public class Genom {
     public AnimalMove move(){
         AnimalMove move = genes[random.nextInt(genes.length)].prefferedMove;
         return move;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(genes);
     }
 }

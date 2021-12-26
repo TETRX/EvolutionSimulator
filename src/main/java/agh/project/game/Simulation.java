@@ -62,6 +62,7 @@ public class Simulation {
         System.out.println("running");
         while (!isFinished()) {
             map.ageUp();
+            map.notifyObservers();
             for (SimulationPhase phase :
                     phases) {
                 waitForUnpause();
@@ -69,12 +70,12 @@ public class Simulation {
                     break;
                 }
                 phase.run();
-                delay();
             }
+            delay();
         }
     }
 
-    private static final int BASE_SPEED = 100;
+    private static final int BASE_SPEED = 500;
 
     private synchronized void delay(){
         try {

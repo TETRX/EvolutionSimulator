@@ -13,4 +13,9 @@ public class Gene {
     public static Gene getRandom(Random random){
         return new Gene(random.nextInt(7));
     }
+
+    @Override
+    public String toString() {
+        return prefferedMove.toString();
+    }
 }

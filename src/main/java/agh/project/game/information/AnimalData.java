@@ -1,10 +1,10 @@
 package agh.project.game.information;
 
 import agh.project.game.animals.Animal;
-import agh.project.game.animals.Gene;
 import agh.project.game.animals.Genom;
 import agh.project.game.map.AnimalState;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class AnimalData {

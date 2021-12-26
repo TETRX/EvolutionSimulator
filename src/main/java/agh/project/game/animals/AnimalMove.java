@@ -35,4 +35,9 @@ public enum AnimalMove {
         MapLocation newLocation = from.getLocation().applyMove(oldOrientation.moveInDirection().scale(moveSpeed));
         return new AnimalState(newOrientation,newLocation);
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(spin);
+    }
 }

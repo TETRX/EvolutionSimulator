@@ -1,6 +1,8 @@
 package agh.project.game.map;
 
-public interface IWorldMap {
+import agh.project.game.information.IObservableMap;
+
+public interface IWorldMap extends IObservableMap {
     void reproducePhase();
     void movementPhase();
     void feedPhase();

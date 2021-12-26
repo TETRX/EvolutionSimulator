@@ -2,6 +2,7 @@ package agh.project.game.map;
 
 import agh.project.game.animals.Animal;
 import agh.project.game.animals.AnimalMove;
+import agh.project.game.animals.Genom;
 import agh.project.game.animals.IAnimalMap;
 import agh.project.game.information.*;
 import agh.project.game.movement.Bounds;
@@ -79,6 +80,7 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
 
     private final Set<IMapObserver> observers;
 
+
     @Override
     public void notifyOfMove(Animal animal, AnimalMove move) {
         AnimalState oldState = animalStates.get(animal);
@@ -97,7 +99,6 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
 
     @Override
     public void reproducePhase() {
-        System.out.println(animalStates.keySet().size());
         ReproductionResults results = reproductionRules.reproduce(animalLocationMap);
 
         AnimalLocationMap children = results.getAnimals();
@@ -110,7 +111,6 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
         }
         animalLocationMap.add(children);
 
-        notifyObservers(currentMapState(Phase.REPRODUCTION));
     }
 
     @Override
@@ -132,11 +132,9 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
             newStates.put(animal,newAnimalState);
         }
         animalStates = newStates;
-        notifyObservers(currentMapState(Phase.MOVEMENT));
     }
 
     private Food foodAt(MapLocation mapLocation){
-        System.out.println(mapLocation);
         return ecosystemMap.get(mapLocation).foodAt(mapLocation);
     }
 
@@ -161,7 +159,6 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
                 animalLocationMap.keySet()) {
                 feedLocally(mapLocation);
         }
-        notifyObservers(currentMapState(Phase.FEEDING));
     }
 
     private Set<MapLocation> animalLocations(){
@@ -180,7 +177,6 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
             Food plant = new Food(daysWorthOfEnergy);
             ecosystem.growRandom(plant,animalLocations());
         }
-        notifyObservers(currentMapState(Phase.GROWTH));
     }
 
     @Override
@@ -200,12 +196,15 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
             animalStates.remove(animal);
             animalLocationMap.removeFrom(corpseLocation,animal);
         }
-        notifyObservers(currentMapState(Phase.STARVING));
     }
 
     @Override
     public void ageUp() {
         age++;
+    }
+
+    public void notifyObservers(){
+        notifyObservers(currentMapState());
     }
 
     private synchronized void notifyObservers(MapState mapState){
@@ -224,7 +223,7 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
                 animal.getChildren().size());
     }
 
-    private MapState currentMapState(Phase phase){
+    private MapState currentMapState(){
         Set<MapLocation> foodData = new HashSet<>();
         List<MapLocation> newGrassLocations = new ArrayList<>();
         List<MapLocation> noLongerGrassLocations = new ArrayList<>();
@@ -240,7 +239,7 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
                 animalStates.keySet()) {
             animalData.add(getAnimalData(animal));
         }
-        return new MapState(animalData,foodData,age,phase, mapBounds, newGrassLocations, noLongerGrassLocations);
+        return new MapState(animalData,foodData,age, mapBounds, newGrassLocations, noLongerGrassLocations);
     }
 
     @Override

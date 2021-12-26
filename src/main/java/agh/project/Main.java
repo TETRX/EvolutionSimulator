@@ -2,10 +2,8 @@ package agh.project;
 
 import agh.project.game.Simulation;
 import agh.project.game.animals.Animal;
-import agh.project.game.animals.Gene;
 import agh.project.game.animals.Genom;
 import agh.project.game.map.AnimalState;
-import agh.project.game.map.MapLocation;
 import agh.project.game.map.MapOrientation;
 import agh.project.game.map.WorldMap;
 import agh.project.game.movement.BarrierMovementRules;
@@ -15,7 +13,11 @@ import agh.project.game.movement.TeleportMovementRules;
 import agh.project.game.reproduction.IReproductionRules;
 import agh.project.game.reproduction.MagicalReproductionRules;
 import agh.project.game.reproduction.StandardReproductionRules;
+import agh.project.stats.SingleStatTracker;
+import agh.project.stats.StatsTracker;
+import agh.project.stats.stattrackers.*;
 import agh.project.ui.simulation.GraphicalMap;
+import agh.project.ui.stats.NumberStatChart;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -23,12 +25,21 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.UnaryOperator;
 
 public class Main extends Application{
@@ -153,7 +164,7 @@ public class Main extends Application{
     }
 
     private void initStartingConfiguration(StartingConfiguration startingConfiguration){
-        System.out.println(startingConfiguration);
+        // init simulation
         Bounds bounds = new Bounds(0,startingConfiguration.height,0,startingConfiguration.width);
 
         Map<Animal, AnimalState> startingAnimals = new HashMap<>();
@@ -186,10 +197,87 @@ public class Main extends Application{
             }
         });
 
+        // init stattracking
+        List<SingleStatTracker<?>> stats = new ArrayList<>();
+        AnimalNumberTracker animalNumberTracker = new AnimalNumberTracker();
+        stats.add(animalNumberTracker);
+        AverageChildNumTracker averageChildNumTracker = new AverageChildNumTracker();
+        stats.add(averageChildNumTracker);
+        AverageEnergyTracker averageEnergyTracker = new AverageEnergyTracker();
+        stats.add(averageEnergyTracker);
+        AverageLifetimeTracker averageLifetimeTracker = new AverageLifetimeTracker();
+        stats.add(averageLifetimeTracker);
+        DominatingGenomTracker dominatingGenomTracker = new DominatingGenomTracker();
+        stats.add(dominatingGenomTracker);
+        GrassNumberTracker grassNumberTracker = new GrassNumberTracker();
+        stats.add(grassNumberTracker);
+        StatsTracker statsTracker = new StatsTracker(stats);
+        worldMap.subscribe(statsTracker);
 
+        //init stat charts
+        NumberStatChart animalNumberChart = NumberStatChart.getNumberStatChart(animalNumberTracker);
+        NumberStatChart averageChildNumChart = NumberStatChart.getNumberStatChart(averageChildNumTracker);
+        NumberStatChart averageEnergyChart = NumberStatChart.getNumberStatChart(averageEnergyTracker);
+        NumberStatChart averageLifetimeChart = NumberStatChart.getNumberStatChart(averageLifetimeTracker);
+        NumberStatChart grassNumberChart = NumberStatChart.getNumberStatChart(grassNumberTracker);
+
+        VBox charts = new VBox();
+        charts.getChildren().addAll(animalNumberChart,averageChildNumChart,averageEnergyChart,averageLifetimeChart,grassNumberChart);
+        ScrollPane chartScrollPane = new ScrollPane();
+        chartScrollPane.setContent(charts);
+        chartScrollPane.setLayoutX(800);
+        chartScrollPane.setLayoutY(0);
+        chartScrollPane.setPrefHeight(800);
+
+        HBox controlPanel = new HBox();
+        AtomicBoolean paused = new AtomicBoolean(false);
+        Button pauseButton = new Button("Pause");
+        pauseButton.setOnAction(event -> {
+            if (paused.get()){
+                simulation.unpause();
+                ((Button)event.getSource()).setText("Pause");
+                paused.set(false);
+            }
+            else {
+                simulation.pause();
+                ((Button)event.getSource()).setText("Unpause");
+                paused.set(true);
+            }
+        });
+
+        //start graphics
         Group root = new Group();
         Stage stage = new Stage();
         Scene scene = new Scene(root);
+
+        Button saveButton = new Button("Save stats");
+        saveButton.setOnAction(event -> {
+            String csvData = statsTracker.getCSVData();
+            TextInputDialog filenameDialog = new TextInputDialog(Paths.get(System.getProperty("user.dir"), "stats.csv").toString());
+            filenameDialog.setHeaderText("Choose a filepath for text");
+
+            Button okButton = (Button) filenameDialog.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
+                String filepath = filenameDialog.getEditor().getText();
+                BufferedWriter writer = null;
+                try {
+                    writer = new BufferedWriter(new FileWriter(filepath));
+                    writer.write(csvData);
+                    writer.close();
+                } catch (IOException e) {
+                    actionEvent.consume();
+                }
+
+            });
+            filenameDialog.show();
+
+        });
+
+        controlPanel.getChildren().add(pauseButton);
+        controlPanel.getChildren().add(saveButton);
+        controlPanel.setLayoutX(0);
+        controlPanel.setLayoutY(800);
+
 
         GraphicalMap graphicalMap = new GraphicalMap(startingConfiguration.width,
                 startingConfiguration.height,
@@ -199,10 +287,11 @@ public class Main extends Application{
         worldMap.subscribe(graphicalMap);
         graphicalMap.setLayoutX(0);
         graphicalMap.setLayoutY(0);
-
         thread.start();
 
         root.getChildren().add(graphicalMap);
+        root.getChildren().add(chartScrollPane);
+        root.getChildren().add(controlPanel);
         stage.setScene(scene);
         stage.show();
     }
