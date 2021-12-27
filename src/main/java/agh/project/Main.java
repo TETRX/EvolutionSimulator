@@ -16,6 +16,8 @@ import agh.project.game.reproduction.StandardReproductionRules;
 import agh.project.stats.SingleStatTracker;
 import agh.project.stats.StatsTracker;
 import agh.project.stats.stattrackers.*;
+import agh.project.ui.animalinfo.AnimalInfoStage;
+import agh.project.ui.animalinfo.GenomTracker;
 import agh.project.ui.simulation.GraphicalMap;
 import agh.project.ui.stats.NumberStatChart;
 import javafx.application.Application;
@@ -28,13 +30,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -273,8 +273,16 @@ public class Main extends Application{
 
         });
 
+        Button trackDominatingGenom = new Button("Track dominating genom");
+        trackDominatingGenom.setOnAction((event -> {
+            AnimalInfoStage animalInfoStage = new AnimalInfoStage(new ArrayList<>());
+            new GenomTracker(animalInfoStage, dominatingGenomTracker.getLastNonNull(), startingConfiguration.startEnergy, worldMap);
+            animalInfoStage.show();
+        }));
+
         controlPanel.getChildren().add(pauseButton);
         controlPanel.getChildren().add(saveButton);
+        controlPanel.getChildren().add(trackDominatingGenom);
         controlPanel.setLayoutX(0);
         controlPanel.setLayoutY(800);
 
@@ -283,7 +291,8 @@ public class Main extends Application{
                 startingConfiguration.height,
                 800,
                 800,
-                startingConfiguration.startEnergy);
+                startingConfiguration.startEnergy,
+                worldMap);
         worldMap.subscribe(graphicalMap);
         graphicalMap.setLayoutX(0);
         graphicalMap.setLayoutY(0);

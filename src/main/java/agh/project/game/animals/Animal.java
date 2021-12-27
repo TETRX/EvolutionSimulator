@@ -1,8 +1,6 @@
 package agh.project.game.animals;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Animal implements Comparable<Animal>{
     public Animal(float energyLevel, IAnimalMap map, Genom genom, Random random, List<Animal> childParents) {
@@ -20,6 +18,7 @@ public class Animal implements Comparable<Animal>{
         this.genom = genom;
         this.random = random;
         children = new ArrayList<>();
+        descendants = new HashSet<>();
     }
 
     public Animal(float energyLevel, Genom genom, Random random){
@@ -33,6 +32,22 @@ public class Animal implements Comparable<Animal>{
     }
 
     private final List<Animal> children;
+
+    private void addDescendant(Animal newborn){
+        if(!descendants.contains(newborn)) {
+            descendants.add(newborn);
+            for (Animal parent :
+                    parents) {
+                parent.addDescendant(newborn);
+            }
+        }
+    }
+
+    public Set<Animal> getDescendants() {
+        return descendants;
+    }
+
+    private final Set<Animal> descendants;
     
     private float energyLevel;
 
@@ -92,6 +107,10 @@ public class Animal implements Comparable<Animal>{
 
         Animal child = new Animal(childEnergy,map,childGenom,random,childParents);
         children.add(child);
+        addDescendant(child);
+
+        partner.children.add(child);
+        partner.addDescendant(child);
 
         return child;
     }

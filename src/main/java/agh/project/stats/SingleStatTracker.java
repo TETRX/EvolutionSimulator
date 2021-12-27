@@ -33,8 +33,17 @@ public abstract class SingleStatTracker <T>{
             observer.update(updateValue);
         }
         statHistory.add(updateValue);
+        if (updateValue!=null){
+            lastNonNull=updateValue;
+        }
         System.out.println(statName()+": "+updateValue);
         return updateValue;
+    }
+
+    private T lastNonNull=null;
+
+    public T getLastNonNull(){
+        return lastNonNull;
     }
 
     public abstract String statName();

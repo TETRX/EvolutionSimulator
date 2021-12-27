@@ -19,7 +19,6 @@ public class GraphicalAnimal extends ImageView {
         return new Image(ANIMAL_IMAGE_LOC, width, height, false, false);
     }
 
-
     public GraphicalAnimal(AnimalData animalState, Image image, float maxEnergy){
         super(image);
         this.maxEnergy = maxEnergy;

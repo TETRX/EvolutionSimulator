@@ -2,7 +2,6 @@ package agh.project.game.map;
 
 import agh.project.game.animals.Animal;
 import agh.project.game.animals.AnimalMove;
-import agh.project.game.animals.Genom;
 import agh.project.game.animals.IAnimalMap;
 import agh.project.game.information.*;
 import agh.project.game.movement.Bounds;
@@ -220,7 +219,8 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
                 animal.getGenom(),
                 animal.getAge(),
                 animalStates.get(animal),
-                animal.getChildren().size());
+                animal.getChildren().size(),
+                animal.getDescendants().size());
     }
 
     private MapState currentMapState(){
