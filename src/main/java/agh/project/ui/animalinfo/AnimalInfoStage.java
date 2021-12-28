@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import java.util.List;
 
 public class AnimalInfoStage extends Stage {
+    private static final float MIN_HEIGHT = 100, MIN_WIDTH = 100;
     private static final float MAX_HEIGHT = 800;
     private HBox hBox;
 
@@ -21,6 +22,9 @@ public class AnimalInfoStage extends Stage {
         setScene(new Scene(scrollPane));
 
         setMaxHeight(MAX_HEIGHT);
+
+        setMinHeight(MIN_HEIGHT);
+        setMinWidth(MIN_WIDTH);
     }
 
     public void addAnimalInfos(List<AnimalInfoDisplay> animalInfos){

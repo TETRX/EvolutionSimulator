@@ -13,6 +13,7 @@ import agh.project.game.movement.TeleportMovementRules;
 import agh.project.game.reproduction.IReproductionRules;
 import agh.project.game.reproduction.MagicalReproductionRules;
 import agh.project.game.reproduction.StandardReproductionRules;
+import agh.project.stats.CSVStatSerializer;
 import agh.project.stats.SingleStatTracker;
 import agh.project.stats.StatsTracker;
 import agh.project.stats.stattrackers.*;
@@ -20,10 +21,12 @@ import agh.project.ui.animalinfo.AnimalInfoStage;
 import agh.project.ui.animalinfo.GenomTracker;
 import agh.project.ui.simulation.GraphicalMap;
 import agh.project.ui.stats.NumberStatChart;
+import agh.project.ui.stats.StringStatDisplay;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -163,6 +166,8 @@ public class Main extends Application{
         return startingConfigurations;
     }
 
+    private static final int MAP_SIZE=800;
+
     private void initStartingConfiguration(StartingConfiguration startingConfiguration){
         // init simulation
         Bounds bounds = new Bounds(0,startingConfiguration.height,0,startingConfiguration.width);
@@ -214,6 +219,8 @@ public class Main extends Application{
         StatsTracker statsTracker = new StatsTracker(stats);
         worldMap.subscribe(statsTracker);
 
+        CSVStatSerializer csvStatSerializer = new CSVStatSerializer(animalNumberTracker, averageChildNumTracker, averageEnergyTracker, averageLifetimeTracker, grassNumberTracker);
+
         //init stat charts
         NumberStatChart animalNumberChart = NumberStatChart.getNumberStatChart(animalNumberTracker);
         NumberStatChart averageChildNumChart = NumberStatChart.getNumberStatChart(averageChildNumTracker);
@@ -225,9 +232,14 @@ public class Main extends Application{
         charts.getChildren().addAll(animalNumberChart,averageChildNumChart,averageEnergyChart,averageLifetimeChart,grassNumberChart);
         ScrollPane chartScrollPane = new ScrollPane();
         chartScrollPane.setContent(charts);
-        chartScrollPane.setLayoutX(800);
+        chartScrollPane.setLayoutX(MAP_SIZE);
         chartScrollPane.setLayoutY(0);
-        chartScrollPane.setPrefHeight(800);
+        chartScrollPane.setPrefHeight(MAP_SIZE);
+        chartScrollPane.setFitToWidth(true);
+
+        StringStatDisplay dominatingGenomDisplay = new StringStatDisplay(dominatingGenomTracker);
+        dominatingGenomDisplay.setLayoutX(MAP_SIZE*0.75);
+        dominatingGenomDisplay.setLayoutY(MAP_SIZE+5);
 
         HBox controlPanel = new HBox();
         AtomicBoolean paused = new AtomicBoolean(false);
@@ -252,7 +264,7 @@ public class Main extends Application{
 
         Button saveButton = new Button("Save stats");
         saveButton.setOnAction(event -> {
-            String csvData = statsTracker.getCSVData();
+            String csvData = csvStatSerializer.getCSVData();
             TextInputDialog filenameDialog = new TextInputDialog(Paths.get(System.getProperty("user.dir"), "stats.csv").toString());
             filenameDialog.setHeaderText("Choose a filepath for text");
 
@@ -283,14 +295,15 @@ public class Main extends Application{
         controlPanel.getChildren().add(pauseButton);
         controlPanel.getChildren().add(saveButton);
         controlPanel.getChildren().add(trackDominatingGenom);
+
         controlPanel.setLayoutX(0);
-        controlPanel.setLayoutY(800);
+        controlPanel.setLayoutY(MAP_SIZE);
 
 
         GraphicalMap graphicalMap = new GraphicalMap(startingConfiguration.width,
                 startingConfiguration.height,
-                800,
-                800,
+                MAP_SIZE,
+                MAP_SIZE,
                 startingConfiguration.startEnergy,
                 worldMap);
         worldMap.subscribe(graphicalMap);
@@ -301,6 +314,7 @@ public class Main extends Application{
         root.getChildren().add(graphicalMap);
         root.getChildren().add(chartScrollPane);
         root.getChildren().add(controlPanel);
+        root.getChildren().add(dominatingGenomDisplay);
         stage.setScene(scene);
         stage.show();
     }

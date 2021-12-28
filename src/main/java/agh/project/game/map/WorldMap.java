@@ -55,6 +55,8 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
             ecosystemMap.put(jungleLocation, jungle);
         }
         observers = new HashSet<>();
+        additionalObservers = new HashSet<>();
+        unsubscribers = new HashSet<>();
     }
 
     private Map<Animal,AnimalState> animalStates;
@@ -211,6 +213,19 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
                 observers) {
             observer.notify(mapState);
         }
+
+        while (!additionalObservers.isEmpty()){
+            HashSet<IMapObserver> additionalObserversCopy = new HashSet<>(additionalObservers);
+            observers.addAll(additionalObservers);
+            additionalObservers.clear();
+            for (IMapObserver mapObserver :
+                    additionalObserversCopy) {
+                mapObserver.notify(mapState);
+            }
+        }
+
+        observers.removeAll(unsubscribers);
+        unsubscribers.clear();
     }
 
     private AnimalData getAnimalData(Animal animal){
@@ -242,13 +257,26 @@ public class WorldMap implements IAnimalMap, IWorldMap, IObservableMap {
         return new MapState(animalData,foodData,age, mapBounds, newGrassLocations, noLongerGrassLocations);
     }
 
+    private final Set<IMapObserver> additionalObservers;
+
     @Override
     public synchronized void subscribe(IMapObserver observer) {
-        observers.add(observer);
+        try{
+            observers.add(observer);
+        } catch (ConcurrentModificationException e){
+            additionalObservers.add(observer);
+        }
     }
+
+    private final Set<IMapObserver> unsubscribers;
 
     @Override
     public synchronized void unsubscribe(IMapObserver observer) {
-        observers.remove(observer);
+        try {
+            observers.remove(observer);
+        }
+        catch (ConcurrentModificationException e){
+            unsubscribers.add(observer);
+        }
     }
 }

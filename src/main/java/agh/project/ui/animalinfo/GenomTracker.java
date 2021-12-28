@@ -17,6 +17,7 @@ import java.util.Set;
 
 public class GenomTracker implements IMapObserver {
     private final AnimalInfoStage animalInfoStage;
+    private final IObservableMap map;
 
     private final Genom genom;
     private final float maxEnergy;
@@ -28,6 +29,7 @@ public class GenomTracker implements IMapObserver {
         this.maxEnergy = maxEnergy;
 
         map.subscribe(this);
+        this.map = map;
     }
 
     private final Set<AnimalData> specimens;
@@ -43,8 +45,10 @@ public class GenomTracker implements IMapObserver {
                     specimens.add(animalData);
 
                     AnimalInfoDisplay animalInfoDisplay = new AnimalInfoDisplay(animalData,state,maxEnergy);
+
                     animalInfoDisplay.trackMoreInfo();
                     newDisplays.add(animalInfoDisplay);
+                    map.subscribe(animalInfoDisplay);
                 }
             }
         }

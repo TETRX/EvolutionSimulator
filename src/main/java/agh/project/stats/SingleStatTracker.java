@@ -34,9 +34,8 @@ public abstract class SingleStatTracker <T>{
         }
         statHistory.add(updateValue);
         if (updateValue!=null){
-            lastNonNull=updateValue;
+            lastNonNull = updateValue;
         }
-        System.out.println(statName()+": "+updateValue);
         return updateValue;
     }
 
